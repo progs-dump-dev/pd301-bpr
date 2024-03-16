@@ -27,3 +27,7 @@ maps/random_base2.map
 maps/random_base2.lit
 maps/random_base2.bsp
 maps/imgui.ini
+maps/DEL_test_viking.bsp
+maps/DEL_test_viking.lit
+maps/DEL_test_viking.map
+progs/viking.mdl
