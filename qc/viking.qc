@@ -42,6 +42,7 @@ $frame v3a1 v3a2 v3a3 v3a4 v3a5 v3a6
 void() viking_char_a1;
 void() viking_run1;
 void() v_idle_sound;
+void() viking_rise;
 
 //============================================================================
 // Standing
@@ -135,14 +136,14 @@ void()	viking_pain8	=[	$vp8,		viking_run1	] {};
 // Stage 2 - Rise and Chase - viking_run_st2_1
 //============================================================================
 
-void()	viking_run_st2_1	=[	$vp2,		viking_run_st2_2	] {ai_charge(9);dprint ("Stage 2 Begins\n");self.cnt = 2;};
-void()	viking_run_st2_2	=[	$vp2,		viking_run_st2_3	] {ai_charge(6);};
-void()	viking_run_st2_3	=[	$vp3,		viking_run_st2_4	] {ai_charge(13);};
-void()	viking_run_st2_4	=[	$vp4,		viking_run_st2_5	] {ai_charge(4);};
-void()	viking_run_st2_5	=[	$vp5,		viking_run_st2_6	] {ai_charge(7);};
-void()	viking_run_st2_6	=[	$vp6,		viking_run_st2_7	] {ai_charge(15);};
-void()	viking_run_st2_7	=[	$vp7,		viking_run_st2_8	] {ai_charge(8);};
-void()	viking_run_st2_8	=[	$vp8,		viking_run_st2_1	] {ai_charge(3);viking_attk_choose();};
+void()	viking_run_st2_1	=[	$vp2,		viking_run_st2_2	] {viking_rise();ai_charge(9);dprint ("Stage 2 Begins\n");self.cnt = 2;};
+void()	viking_run_st2_2	=[	$vp2,		viking_run_st2_3	] {viking_rise();ai_charge(6);};
+void()	viking_run_st2_3	=[	$vp3,		viking_run_st2_4	] {viking_rise();ai_charge(13);};
+void()	viking_run_st2_4	=[	$vp4,		viking_run_st2_5	] {viking_rise();ai_charge(4);};
+void()	viking_run_st2_5	=[	$vp5,		viking_run_st2_6	] {viking_rise();ai_charge(7);};
+void()	viking_run_st2_6	=[	$vp6,		viking_run_st2_7	] {viking_rise();ai_charge(15);};
+void()	viking_run_st2_7	=[	$vp7,		viking_run_st2_8	] {viking_rise();ai_charge(8);};
+void()	viking_run_st2_8	=[	$vp8,		viking_run_st2_1	] {viking_rise();ai_charge(3);viking_attk_choose();};
 
 //============================================================================
 // Stage 2 Pain
@@ -204,6 +205,18 @@ void()	viking_die16	=[	$vd14,	viking_die16	]
 		self.origin = self.origin + '0 0 8';
 		GrenadeExplode();
 		return;
+};
+
+void() viking_rise =
+{
+	self.altitude = self.origin_z;
+
+	if (self.altitude == 128)
+	return;
+
+	self.flags -= self.flags & FL_ONGROUND;
+	self.velocity_z += 1;
+	self.altitude += 1;
 };
 
 //============================================================================
@@ -326,6 +339,10 @@ void(entity attacker, float damage)	viking_pain =
 
 	v_pain_sound();
 
+	dprint("\bHEALTH\n"); //debug dumptruck_ds
+	dprint(ftos(self.health));
+	dprint("\b...\n"); //debug dumptruck_ds
+
 	if (!self.cnt)
 		{
 			if (self.health < self.max_health * 0.66)
@@ -394,7 +411,7 @@ void() viking_attk_choose =
 	if (self.cnt == 1)
 	viking_attk_st2_1();
 
-	if (self.cnt > 1)
+	if (self.cnt == 2)
 	{
 		dprint ("Stage 3 Begins\n");
 		viking_attk_st2_1();
@@ -421,7 +438,7 @@ void() viking_run_choose =
 	if (self.cnt == 1)
 	viking_run_st2_1();
 
-	if (self.cnt > 1)
+	if (self.cnt == 2)
 	viking_run_st3_1();
 
 };
