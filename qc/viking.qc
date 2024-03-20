@@ -42,7 +42,6 @@ $frame v3a1 v3a2 v3a3 v3a4 v3a5 v3a6
 void() viking_char_a1;
 void() viking_run1;
 void() v_idle_sound;
-void() viking_rise;
 
 //============================================================================
 // Standing
@@ -104,7 +103,6 @@ void()	viking_walk20	=[	$vw20,	viking_walk1	] {ai_walk(2);};
 
 void()	viking_run1	=[	$vw1,		viking_run2	]
 {
-	dprint ("\bviking_run1\n");
 	v_idle_sound();
 	ai_run(20);
 	vCheckForCharge ();
@@ -120,10 +118,10 @@ void()	viking_run9	=[	$vw17,		viking_run10	] {ai_run(21);};
 void()	viking_run10 =[ $vw19,		viking_run1	] {ai_run(13);};
 
 //============================================================================
-// Pain
+// Pain - Stage 1
 //============================================================================
 
-void()	viking_pain1	=[	$vp2,		viking_pain2	] {dprint ("pain1");};
+void()	viking_pain1	=[	$vp2,		viking_pain2	] {};
 void()	viking_pain2	=[	$vp2,		viking_pain3	] {};
 void()	viking_pain3	=[	$vp3,		viking_pain4	] {};
 void()	viking_pain4	=[	$vp4,		viking_pain5	] {};
@@ -131,45 +129,6 @@ void()	viking_pain5	=[	$vp5,		viking_pain6	] {};
 void()	viking_pain6	=[	$vp6,		viking_pain7	] {};
 void()	viking_pain7	=[	$vp7,		viking_pain8	] {};
 void()	viking_pain8	=[	$vp8,		viking_run1	] {};
-
-//============================================================================
-// Stage 2 - Rise and Chase - viking_run_st2_1
-//============================================================================
-
-void()	viking_run_st2_1	=[	$vp2,		viking_run_st2_2	] {viking_rise();ai_charge(9);dprint ("Stage 2 Begins\n");self.cnt = 2;};
-void()	viking_run_st2_2	=[	$vp2,		viking_run_st2_3	] {viking_rise();ai_charge(6);};
-void()	viking_run_st2_3	=[	$vp3,		viking_run_st2_4	] {viking_rise();ai_charge(13);};
-void()	viking_run_st2_4	=[	$vp4,		viking_run_st2_5	] {viking_rise();ai_charge(4);};
-void()	viking_run_st2_5	=[	$vp5,		viking_run_st2_6	] {viking_rise();ai_charge(7);};
-void()	viking_run_st2_6	=[	$vp6,		viking_run_st2_7	] {viking_rise();ai_charge(15);};
-void()	viking_run_st2_7	=[	$vp7,		viking_run_st2_8	] {viking_rise();ai_charge(8);};
-void()	viking_run_st2_8	=[	$vp8,		viking_run_st2_1	] {viking_rise();ai_charge(3);viking_attk_choose();};
-
-//============================================================================
-// Stage 2 Pain
-//============================================================================
-
-void()	viking_pain_st2_1	=[	$vp2,		viking_pain_st2_2	] {dprint ("Stage 2 \bPAIN!!!!\n");};
-void()	viking_pain_st2_2	=[	$vp2,		viking_pain_st2_3	] {};
-void()	viking_pain_st2_3	=[	$vp3,		viking_pain_st2_4	] {};
-void()	viking_pain_st2_4	=[	$vp4,		viking_pain_st2_5	] {};
-void()	viking_pain_st2_5	=[	$vp5,		viking_pain_st2_6	] {};
-void()	viking_pain_st2_6	=[	$vp6,		viking_pain_st2_7	] {};
-void()	viking_pain_st2_7	=[	$vp7,		viking_pain_st2_8	] {};
-void()	viking_pain_st2_8	=[	$vp8,		viking_run_st2_1	] {viking_attk_choose();};
-
-//============================================================================
-// Stage 2 Attack - viking_attk_st2_1
-//============================================================================
-
-void()	viking_attk_st2_1	=[	$vp2,		viking_attk_st2_2	] {ai_face();self.homing = 0;hknight_shot(0);dprint ("Stage 2 \bATTACK\n");};
-void()	viking_attk_st2_2	=[	$vp2,		viking_attk_st2_3	] {ai_face();};
-void()	viking_attk_st2_3	=[	$vp3,		viking_attk_st2_4	] {ai_face();};
-void()	viking_attk_st2_4	=[	$vp4,		viking_attk_st2_5	] {ai_face();};
-void()	viking_attk_st2_5	=[	$vp5,		viking_attk_st2_6	] {ai_face();};
-void()	viking_attk_st2_6	=[	$vp6,		viking_attk_st2_7	] {ai_face();};
-void()	viking_attk_st2_7	=[	$vp7,		viking_attk_st2_8	] {ai_face();};
-void()	viking_attk_st2_8	=[	$vp8,		viking_run_st2_1	] {ai_face();viking_run_choose();};
 
 //============================================================================
 // Death Final Gib
@@ -205,18 +164,6 @@ void()	viking_die16	=[	$vd14,	viking_die16	]
 		self.origin = self.origin + '0 0 8';
 		GrenadeExplode();
 		return;
-};
-
-void() viking_rise =
-{
-	self.altitude = self.origin_z;
-
-	if (self.altitude == 128)
-	return;
-
-	self.flags -= self.flags & FL_ONGROUND;
-	self.velocity_z += 1;
-	self.altitude += 1;
 };
 
 //============================================================================
@@ -292,25 +239,10 @@ void() vCheckForCharge =
 	if ( vlen (self.origin - self.enemy.origin) < 80)
 		// use regular attack
 		return;
-		dprint ("CHARGE!!!!!\n");
 	// charge
 	SUB_AttackFinished (2);
 	viking_run1 ();
 };
-
-// void() vCheckContinueCharge =
-// {
-// 	if (time > self.attack_finished)
-// 	{
-// 		SUB_AttackFinished (3);
-// 		viking_run1 ();
-// 		return;		// done charging
-// 	}
-// 	if (random() > 0.5)
-// 		sound (self, CHAN_WEAPON, "knight/sword2.wav", 1, ATTN_NORM);
-// 	else
-// 		sound (self, CHAN_WEAPON, "knight/sword1.wav", 1, ATTN_NORM);
-// };
 
 //============================================================================
 // Sounds Misc
@@ -325,7 +257,10 @@ void() v_idle_sound =
 void() v_pain_sound =
 {
 	if (random() < 0.2)
-		sound (self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+	{
+		self.pain_finished = time + 1.5;
+		sound_pain (self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+	}
 };
 
 //============================================================================
@@ -334,49 +269,37 @@ void() v_pain_sound =
 
 void(entity attacker, float damage)	viking_pain =
 {
+	local float r;
+
+	r = random();
+
 	if (self.pain_finished > time)
-	return;
+		return;
+
+	if (self.spawnflags & I_AM_TURRET)
+	{
+		if (r < 0.5)
+		{
+			self.pain_finished = time + 1.5;
+			sound_pain (self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+		}
+		return;
+	}
 
 	v_pain_sound();
 
-	dprint("\bHEALTH\n"); //debug dumptruck_ds
-	dprint(ftos(self.health));
-	dprint("\b...\n"); //debug dumptruck_ds
-
-	if (!self.cnt)
-		{
-			if (self.health < self.max_health * 0.66)
-			{
-					self.cnt = 1;
-					viking_pain_st2_1();
-					return;
-			}
-		}
-
-	if (self.cnt == 1)
-		{
-			if (self.health < self.max_health * 0.33)
-			{
-				self.cnt = 2;
-				viking_run_st3_1();
-				return;
-			}
-		}
-	{
-
-	// if (time - self.pain_finished > 5)
-	// if ((time - self.pain_finished > 5) && (self.cnt != 1))
-	// {
-	// 	// always go into pain frame if it has been a while
-	// 	viking_pain1 ();
-	// 	self.pain_finished = time + 1;
-	// 	return;
-	// }
-
-	if ((random()*90 > damage) && (self.cnt != 1))
-		// didn't flinch
+	if (time - self.pain_finished > 5)
+	{	// always go into pain frame if it has been a while
+		viking_pain1();
+		self.pain_finished = time + 1;
 		return;
 	}
+
+	if ((random()*90 > damage) )
+		return;		// didn't flinch
+
+	self.pain_finished = time + 1;
+	viking_pain1();
 };
 
 //============================================================================
@@ -387,60 +310,6 @@ void() viking_melee =
 {
 	sound (self, CHAN_WEAPON, "hknight/slash1.wav", 1, ATTN_NORM);
 	viking_watk1 ();
-};
-
-void() viking_melee_choose =
-{
-	if (!self.cnt)
-	viking_melee();
-
-	if (self.cnt == 1) // doesn't melee in stage2
-	return;
-
-	if (self.cnt > 1)
-	// viking_melee_st3();  // need to create this
-	return; //TEMP
-
-};
-
-void() viking_attk_choose =
-{
-	if (!self.cnt)
-	viking_magica1();
-
-	if (self.cnt == 1)
-	viking_attk_st2_1();
-
-	if (self.cnt == 2)
-	{
-		dprint ("Stage 3 Begins\n");
-		viking_attk_st2_1();
-		// viking_attk_st3_1(); // need to create this
-		return; //TEMP
-	}
-
-};
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-void() viking_run_st3_1 =
-{
-	dprint ("Stage 3 \bRUN RUN RUN RUN!\n");
-	viking_run_st2_1();
-};
-
-void() viking_run_choose =
-{
-	if (!self.cnt)
-	{
-		dprint ("viking_run_choose\n");
-		viking_run1();
-	}
-
-	if (self.cnt == 1)
-	viking_run_st2_1();
-
-	if (self.cnt == 2)
-	viking_run_st3_1();
-
 };
 
 /*QUAKED monster_viking (1 0 0) (-16 -16 -24) (16 16 40) Ambush
@@ -490,13 +359,11 @@ void() monster_viking =
 
 	self.th_stand = viking_stand1;
 	self.th_walk = viking_walk1;
-	self.th_run = viking_run_choose;
-	self.th_melee = viking_melee_choose;
-	self.th_missile = viking_attk_choose;
+	self.th_run = viking_run1;
+	self.th_melee = viking_watk1;
+	self.th_missile = viking_magica1;
 	self.th_pain = viking_pain;
 	self.th_die = viking_die;
-	// self.cnt = 0;
 
 	walkmonster_start ();
 };
-//I'm dumb this is a test for Github
