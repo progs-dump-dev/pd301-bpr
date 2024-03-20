@@ -118,7 +118,7 @@ void()	viking_run9	=[	$vw17,		viking_run10	] {ai_run(21);};
 void()	viking_run10 =[ $vw19,		viking_run1	] {ai_run(13);};
 
 //============================================================================
-// Pain - Stage 1
+// Pain
 //============================================================================
 
 void()	viking_pain1	=[	$vp2,		viking_pain2	] {};
@@ -321,24 +321,17 @@ void() monster_viking =
 		remove(self);
 		return;
 	}
-	precache_sound ("boss1/throw.wav"); // jaycie erysdren 2021-09-14
+	precache_sound ("boss1/throw.wav"); // for fireballs
 
 	precache_model2 ("progs/viking.mdl");
 	precache_model2 ("progs/k_spike.mdl");
 	precache_model2 ("progs/h_hellkn.mdl");
 
-
-	precache_sound2 ("hknight/attack1.wav");
 	precache_sound2 ("hknight/death1.wav");
 	precache_sound2 ("hknight/pain1.wav");
 	precache_sound2 ("hknight/sight1.wav");
-	precache_sound ("hknight/hit.wav");		// used by C code, so don't sound2
-	precache_sound2 ("hknight/slash1.wav");
+	precache_sound2 ("hknight/slash1.wav"); // replace with Hammer melee sfx
 	precache_sound2 ("hknight/idle.wav");
-	precache_sound2 ("hknight/grunt.wav");
-
-	precache_sound ("knight/sword1.wav");
-	precache_sound ("knight/sword2.wav");
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
@@ -350,9 +343,9 @@ void() monster_viking =
 	if (!self.health)
 	{
 		if (skill == 0)
-			self.health = 1000;
+			self.health = 750;
 		else
-			self.health = 3000;
+			self.health = 2500;
 	}
 
 	self.max_health = self.health; // thanks 4LT -dumptruck_ds
