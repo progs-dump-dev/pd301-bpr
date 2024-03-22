@@ -323,8 +323,8 @@ void() monster_viking =
 	}
 	precache_sound ("boss1/throw.wav"); // for fireballs
 
-	precache_model2 ("progs/viking.mdl");
-	precache_model2 ("progs/k_spike.mdl");
+	precache_body_model2 ("progs/viking.mdl");
+	// precache_model2 ("progs/k_spike.mdl");
 	precache_model2 ("progs/h_hellkn.mdl");
 
 	precache_sound2 ("hknight/death1.wav");
@@ -336,7 +336,7 @@ void() monster_viking =
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
-	setmodel (self, "progs/viking.mdl");
+	body_model ("progs/viking.mdl");
 
 	setsize (self, '-16 -16 -24', '16 16 40');
 
