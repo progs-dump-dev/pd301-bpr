@@ -836,7 +836,7 @@ style(Choices) : "Attack type" =
 	{{
 	        mdl_body -> {"path" : mdl_body, "skin" : skin}, {"path": "progs/viking.mdl" , "skin" : skin}
 	    }}
-) = monster_viking : "Plagued Paladin (boss)
+) = monster_viking : "The Weird Knight (boss)
 Default health = Easy is 750, Others are 2500"
 [
 // projexpl(Choices) : "Exploding projectiles" =
