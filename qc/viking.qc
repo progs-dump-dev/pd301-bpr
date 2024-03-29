@@ -139,7 +139,7 @@ void()	viking_die2	=[	$vd2,	viking_die3	] {ai_forward(8);};
 void()	viking_die3	=[	$vd3,	viking_die4	]
 {
 	self.solid = SOLID_NOT;
-	ai_forward(7);
+	ai_forward(5);
 };
 void()	viking_die4	=[	$vd4,	viking_die5	] {};
 void()	viking_die5	=[	$vd5,	viking_die6	] {};
@@ -153,7 +153,11 @@ void()	viking_die12	=[	$vd12,	viking_die13	] {};
 void()	viking_die13	=[	$vd13,	viking_die14	] {};
 void()	viking_die14	=[	$vd14,	viking_die15	]	{};
 void()	viking_die15	=[	$vd14,	viking_die16	]	{};
-void()	viking_die16	=[	$vd14,	viking_die16	]
+void()	viking_die16	=[	$vd14,	viking_die17	]	{SUB_UseTargets ();};
+void()	viking_die17	=[	$vd14,	viking_die18	]	{};
+void()	viking_die18	=[	$vd14,	viking_die19	]	{};
+void()	viking_die19	=[	$vd14,	viking_die20	]	{};
+void()	viking_die20	=[	$vd14,	viking_die20	]
 {
 		self.origin = self.origin + '0 0 8';
 		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
@@ -218,7 +222,7 @@ void()	viking_watk2	=[	$vfa4,	viking_watk3	] {ai_charge(16);};
 void()	viking_watk3	=[	$vfa6,	viking_watk4	] {ai_charge(20);};
 void()	viking_watk4	=[	$vfa8,	viking_watk5	] {ai_charge(13);};
 void()	viking_watk5=[	$vfa10,	viking_watk6	] {ai_charge(20);};
-void()	viking_watk6=[	$vfa12,	viking_watk7	] {ai_charge(16);self.damage_mod = 4;ai_melee();};
+void()	viking_watk6=[	$vfa12,	viking_watk7	] {ai_charge(16);self.damage_mod = 9;ai_melee();};
 void()	viking_watk7=[	$vfa14,	viking_watk8	] {ai_charge(25); ai_melee();};
 void()	viking_watk8=[	$vfa16,	viking_run1	] {ai_charge(13);self.damage_mod = 0;};
 
