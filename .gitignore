@@ -31,3 +31,4 @@ maps/DEL_test_viking.bsp
 maps/DEL_test_viking.lit
 maps/DEL_test_viking.map
 progs/viking.mdl
+*.mdl
