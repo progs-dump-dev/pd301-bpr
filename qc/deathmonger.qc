@@ -166,18 +166,22 @@ void() deathmonger_magic9  =[ $magic9,  deathmonger_magic10a ] {ai_face();};
 
 void() deathmonger_magic10a =[ $magic10, deathmonger_magic11a ] {
 	ai_face();
+	OgreFireLavaBall();
+	sound_misc2 (self, CHAN_WEAPON, "shalrath/attack2.wav", 1, ATTN_NORM);self.homing = .5;
 	deathmonger_shoot();
 };
 void() deathmonger_magic11a =[ $magic11, deathmonger_magic10b ] {};
 
 void() deathmonger_magic10b =[ $magic10, deathmonger_magic11b ] {
 	ai_face();
+	OgreFireLavaBall();self.homing = .7;
 	deathmonger_shoot();
 };
 void() deathmonger_magic11b =[ $magic11, deathmonger_magic10c ] {};
 
 void() deathmonger_magic10c =[ $magic10, deathmonger_magic11c ] {
 	ai_face();
+	OgreFireLavaBall();self.homing = .9;
 	deathmonger_shoot();
 };
 void() deathmonger_magic11c =[ $magic11, deathmonger_magic12 ] {};
@@ -203,7 +207,8 @@ void()	deathmonger_pain1	=[	$pain1,		deathmonger_pain2	] {
 	sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
 	self.walkframe = 0;
 };
-void()	deathmonger_pain2	=[	$pain2,		deathmonger_pain3	] {
+void()	deathmonger_pain2	=[	$pain2,		deathmonger_run1	] {
+// void()	deathmonger_pain2	=[	$pain2,		deathmonger_pain3	] {
 	if (self.walkframe < 10) {
 		self.walkframe += 1;
 		self.frame = $pain1 + self.walkframe;
@@ -293,6 +298,16 @@ void() deathmonger_die =
 
 void() monster_death_monger =
 {
+	if (SUB_Inhibit ())  // new spawnflags for all entities -- iw
+		return;
+
+	if (deathmatch)
+	{
+		remove(self);
+		return;
+	}
+	precache_sound ("boss1/throw.wav"); // for fireballs
+
 	precache_model2("progs/deathmonger.mdl");
 	precache_model2("progs/h_dthmgr.mdl");
 	precache_model2("progs/k_spike.mdl");
@@ -312,29 +327,43 @@ void() monster_death_monger =
 	precache_sound("knight/sword1.wav");
 	precache_sound("knight/sword2.wav");
 
-	if (ExtSupported("EX_SPRINT")) {
-		self.killstring = "$qc_ks_deathmonger";
-		self.netname = "$qc_death_monger";
-	}
-	else {
-		self.killstring = " was hammer dropped by a Death Monger\n";
-		self.netname = "Death Monger";
-	}
+	// if (ExtSupported("EX_SPRINT")) {
+	// 	self.killstring = "$qc_ks_deathmonger";
+	// 	self.netname = "$qc_death_monger";
+	// }
+	// else {
+	// 	self.killstring = " was hammer dropped by a Death Monger\n";
+	self.solid = SOLID_SLIDEBOX;
+	self.movetype = MOVETYPE_STEP;
 
+	body_model ("progs/deathmonger.mdl");
+
+	setsize (self, '-16 -16 -24', '16 16 40');
+
+	self.netname = "Death Monger";
+	// }
+	if (!self.health) //thanks RennyC -- dumptruck_ds
 	self.health = 1000;
 	self.max_health = self.health;
 
-	self.allowPathFind = TRUE;
-	self.combat_style = CS_MIXED;
+	if (!self.proj_speed_mod)
+	{
+		self.proj_speed_mod = 1;
+	}
+
+	// self.allowPathFind = TRUE;
+	// self.combat_style = CS_MIXED;
 	//self.qccFlags |= QCC_FL_FIREPROOF;
 
 	self.th_stand = deathmonger_stand1;
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
-	self.th_melee = deathmonger_melee;
-	self.th_missile = deathmonger_magic;
+	self.th_melee = deathmonger_melee1;
+	self.th_missile = deathmonger_magic1;
 	self.th_pain = deathmonger_pain;
+	self.th_pain = SUB_NullPain;
 	self.th_die = deathmonger_die;
 
-	InitMonster("progs/deathmonger.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_SMALL);
+	walkmonster_start ();
+	// InitMonster("progs/deathmonger.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_SMALL);
 };

@@ -1341,6 +1341,8 @@ void(entity targ, entity inflictor, entity attacker) ClientObituary =
 					bprint (" was scragged by a Scrag\n");
 				if (attacker.classname == "monster_zombie")
 					bprint (" joins the Zombies\n");
+				if (attacker.classname == "monster_death_monger") //Badpak Redux
+					bprint (" was hammer dropped by a Death Monger\n");
 
 				return;
 			}

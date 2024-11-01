@@ -1,5 +1,5 @@
 mod_template
-progs.*
+progs.dat
 *.cfg
 *.zip
 
@@ -32,3 +32,9 @@ maps/DEL_test_viking.lit
 maps/DEL_test_viking.map
 progs/viking.mdl
 *.mdl
+maps/deathmonger_test.map
+maps/deathmonger_test.lit
+maps/deathmonger_test.bsp
+maps/deathmonger_test-crash.map
+maps/deathmonger_test-crash.txt
+progs.lno

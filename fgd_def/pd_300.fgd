@@ -3507,3 +3507,11 @@ sounds(choices) : "Sound style" : 0 =
 		1 : "Not in coop" : 0
 	]
 ]
+@PointClass base(Monster, Berserk) size(-16 -16 -24, 16 16 40) model(
+	{{
+	        mdl_body -> {"path" : mdl_body, "skin" : skin}, {"path": "progs/deathmonger.mdl" , "skin" : skin}
+	    }}
+) = monster_death_monger : "The Death Monger
+Default health = 1000"
+[
+]
