@@ -16,6 +16,15 @@
 
     See file, 'COPYING', for details.
 */
+// misc copy and paste for ref
+/////////////////////////////
+// causes dmg and pushes player up:
+// T_RadiusDamage (self, self, 120, self);
+// self.enemy.punchangle_x = -8;
+// self.enemy.velocity = '0 0 500';
+/////////////////////////////
+// spawn_tfog (self.origin + v_forward*96); 96 units in front
+/////////////////////////////
 
 /*
 ==============================================================================
@@ -104,6 +113,7 @@ void()	deathmonger_walk20	=[	$walk20,	deathmonger_walk1	] {ai_walk(2);};
 void()	deathmonger_run1	=[	$run1,		deathmonger_run2	] {
 	deathmonger_idle_sound();
 	ai_run (20);
+	dmCheckForCharge ();
 };
 void()	deathmonger_run2	=[	$run2,		deathmonger_run3	] {ai_run(25);};
 void()	deathmonger_run3	=[	$run3,		deathmonger_run4	] {ai_run(18);};
@@ -112,7 +122,6 @@ void()	deathmonger_run5	=[	$run5,		deathmonger_run6	] {ai_run(14);};
 void()	deathmonger_run6	=[	$run6,		deathmonger_run7	] {ai_run(25);};
 void()	deathmonger_run7	=[	$run7,		deathmonger_run8	] {ai_run(21);};
 void()	deathmonger_run8	=[	$run8,		deathmonger_run1	] {ai_run(13);};
-
 
 /* MELEE ATTACK =========================================================================
 Big overhead swing.
@@ -130,13 +139,93 @@ void() deathmonger_melee10 =[ $melee10, deathmonger_melee11 ] {ai_face();};
 void() deathmonger_melee11 =[ $melee11, deathmonger_melee12 ] {ai_face();};
 void() deathmonger_melee12 =[ $melee12, deathmonger_melee13 ] {ai_face();};
 void() deathmonger_melee13 =[ $melee13, deathmonger_melee14 ] {ai_face();};
-void() deathmonger_melee14 =[ $melee14, deathmonger_melee15 ] {};
-
-// Hammer impact
+void() deathmonger_melee14 =[ $melee14, deathmonger_melee15 ] {ai_face();};
+/*
+// Hammer impact (WIP Paril method)
 void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
 
-};
+	T_RadiusDamage (self, self.owner, 120, self);
 
+	makevectors(self.angles);
+
+	local entity exp;
+
+	exp = spawn();
+	exp.origin = self.origin + v_forward*88;
+	exp.velocity = '0 0 72';
+	exp.touch = SUB_Null;
+	setmodel (exp, "progs/s_null.spr");
+	exp.solid = SOLID_NOT;
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+	WriteCoord (MSG_BROADCAST, exp.origin_x);
+	WriteCoord (MSG_BROADCAST, exp.origin_y);
+	WriteCoord (MSG_BROADCAST, exp.origin_z);
+
+	vector c = normalize(self.enemy.origin - self.origin);
+	self.enemy.velocity += c * 600;
+	self.enemy.velocity.z += 200;
+	// self.enemy.velocity += c * 600;
+	// self.enemy.velocity.z += 100;
+
+};
+*/
+// Hammer impact (WIP Voidforce method)
+
+// constants
+#define DISTANCE_TERMINATOR 384 // no force applied after this point
+#define DISTANCE_FADETOMIN 256 // only minimal force applied after this point
+#define MINIMAL_FORCE 0.5
+// #define DISTANCE_TERMINATOR 192 // no force applied after this point
+// #define DISTANCE_FADETOMIN 128 // only minimal force applied after this point
+// #define MINIMAL_FORCE 0.3
+#define PUSH_POWER 600
+#define PUSH_POWER_VERTICAL 270
+
+void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
+
+		ai_face();
+    vector offset, direction;
+    entity exp;
+    float falloff;
+
+    makevectors(self.angles);
+    offset = [self.origin_x + v_forward_x * 88, self.origin_y + v_forward_y * 88, self.absmin_z];
+
+    exp = spawn();
+    exp.origin = offset; // spawn explosion in the actual impact point
+    exp.touch = SUB_Null;
+    setmodel (exp, "progs/s_null.spr");
+    exp.solid = SOLID_NOT;
+
+// uses exp origin to calculate radius damage falloff
+    T_RadiusDamage (exp, self, 90, self);
+
+// calculating raw value of distance from impact point to the player's center point, store in falloff
+    direction = self.enemy.origin - offset;
+    falloff = vlen(direction);
+
+// if player is close enough
+    if (falloff < DISTANCE_TERMINATOR)
+    {
+        if (falloff > DISTANCE_FADETOMIN)
+            falloff = MINIMAL_FORCE;
+        else
+        // calculatig falloff fade amount, in this case raw value (falloff) is in range [0..DISTANCE_FADETOMIN]
+            falloff = falloff / DISTANCE_FADETOMIN;
+
+    // now apply the push
+    // set directional vector to length of 1
+        direction = normalize(direction);
+        self.enemy.velocity += [direction_x * PUSH_POWER * falloff, direction_y * PUSH_POWER * falloff, PUSH_POWER_VERTICAL * falloff];
+    }
+
+    WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+    WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+    WriteCoord (MSG_BROADCAST, exp.origin_x);
+    WriteCoord (MSG_BROADCAST, exp.origin_y);
+    WriteCoord (MSG_BROADCAST, exp.origin_z);
+};
 void() deathmonger_melee16 =[ $melee16, deathmonger_melee17 ] {};
 void() deathmonger_melee17 =[ $melee17, deathmonger_melee18 ] {};
 void() deathmonger_melee18 =[ $melee18, deathmonger_melee19 ] {};
@@ -150,9 +239,6 @@ void() deathmonger_melee23 =[ $melee23, deathmonger_run1 ] {};
 /* MAGIC ATTACK =========================================================================
 Fires homing fireballs?
 */
-void() deathmonger_shoot = {
-
-}
 
 void() deathmonger_magic1  =[ $magic1,  deathmonger_magic2  ] {};
 void() deathmonger_magic2  =[ $magic2,  deathmonger_magic3  ] {};
@@ -163,44 +249,59 @@ void() deathmonger_magic6  =[ $magic6,  deathmonger_magic7  ] {ai_face();};
 void() deathmonger_magic7  =[ $magic7,  deathmonger_magic8  ] {ai_face();};
 void() deathmonger_magic8  =[ $magic8,  deathmonger_magic9  ] {ai_face();};
 void() deathmonger_magic9  =[ $magic9,  deathmonger_magic10a ] {ai_face();};
-
 void() deathmonger_magic10a =[ $magic10, deathmonger_magic11a ] {
 	ai_face();
 	OgreFireLavaBall();
-	sound_misc2 (self, CHAN_WEAPON, "shalrath/attack2.wav", 1, ATTN_NORM);self.homing = .5;
-	deathmonger_shoot();
+	sound_misc2 (self, CHAN_WEAPON, "shalrath/attack2.wav", 1, ATTN_NORM);
+	self.homing = .5;
 };
 void() deathmonger_magic11a =[ $magic11, deathmonger_magic10b ] {};
-
 void() deathmonger_magic10b =[ $magic10, deathmonger_magic11b ] {
 	ai_face();
 	OgreFireLavaBall();self.homing = .7;
-	deathmonger_shoot();
 };
-void() deathmonger_magic11b =[ $magic11, deathmonger_magic10c ] {};
-
+void() deathmonger_magic11b =[ $magic11, deathmonger_magic10c ] {ai_face();};
 void() deathmonger_magic10c =[ $magic10, deathmonger_magic11c ] {
 	ai_face();
 	OgreFireLavaBall();self.homing = .9;
-	deathmonger_shoot();
 };
-void() deathmonger_magic11c =[ $magic11, deathmonger_magic12 ] {};
-
-void() deathmonger_magic12 =[ $magic12, deathmonger_magic13 ] {};
-void() deathmonger_magic13 =[ $magic13, deathmonger_magic14 ] {};
-void() deathmonger_magic14 =[ $magic14, deathmonger_magic15 ] {};
-void() deathmonger_magic15 =[ $magic15, deathmonger_magic16 ] {};
-void() deathmonger_magic16 =[ $magic16, deathmonger_magic17 ] {};
-void() deathmonger_magic17 =[ $magic17, deathmonger_magic18 ] {};
-void() deathmonger_magic18 =[ $magic18, deathmonger_magic19 ] {};
-void() deathmonger_magic19 =[ $magic19, deathmonger_magic20 ] {};
-void() deathmonger_magic20 =[ $magic20, deathmonger_magic21 ] {};
-void() deathmonger_magic21 =[ $magic21, deathmonger_magic22 ] {};
-void() deathmonger_magic22 =[ $magic22, deathmonger_magic23 ] {};
-void() deathmonger_magic23 =[ $magic23, deathmonger_magic24 ] {};
-void() deathmonger_magic24 =[ $magic24, deathmonger_magic25 ] {};
+void() deathmonger_magic11c =[ $magic11, deathmonger_magic12 ] {ai_face();};
+void() deathmonger_magic12 =[ $magic12, deathmonger_magic13 ] {ai_face();};
+void() deathmonger_magic13 =[ $magic13, deathmonger_magic14 ] {ai_face();};
+void() deathmonger_magic14 =[ $magic14, deathmonger_magic15 ] {ai_face();};
+void() deathmonger_magic15 =[ $magic15, deathmonger_magic16 ] {ai_face();};
+void() deathmonger_magic16 =[ $magic16, deathmonger_magic17 ] {ai_face();};
+void() deathmonger_magic17 =[ $magic17, deathmonger_magic18 ] {ai_face();};
+void() deathmonger_magic18 =[ $magic18, deathmonger_magic19 ] {ai_face();};
+void() deathmonger_magic19 =[ $magic19, deathmonger_magic20 ] {ai_face();};
+void() deathmonger_magic20 =[ $magic20, deathmonger_magic21 ] {ai_face();};
+void() deathmonger_magic21 =[ $magic21, deathmonger_magic22 ] {ai_face();};
+void() deathmonger_magic22 =[ $magic22, deathmonger_magic23 ] {ai_face();};
+void() deathmonger_magic23 =[ $magic23, deathmonger_magic24 ] {ai_face();};
+void() deathmonger_magic24 =[ $magic24, deathmonger_magic25 ] {ai_face();};
 void() deathmonger_magic25 =[ $magic25, deathmonger_run1 ] {};
 
+//============================================================================
+// Charge animation
+//============================================================================
+
+void() dmCheckForCharge =
+{
+	// check for mad charge
+	if (!enemy_vis)
+		return;
+	if (time < self.attack_finished)
+		return;
+	if ( fabs(self.origin_z - self.enemy.origin_z) > 20)
+		// too much height change
+		return;
+	if ( vlen (self.origin - self.enemy.origin) < 80)
+		// use regular attack
+		return;
+	// charge
+	SUB_AttackFinished (2);
+	deathmonger_run1 ();
+};
 
 // PAIN ============================================================================
 void()	deathmonger_pain1	=[	$pain1,		deathmonger_pain2	] {
@@ -217,12 +318,22 @@ void()	deathmonger_pain2	=[	$pain2,		deathmonger_run1	] {
 		deathmonger_run1();
 };
 
+void() dm_pain_sound = // FIXME - make this random selection of pain sounds
+{
+	if (random() < 0.2)
+	{
+		self.pain_finished = time + 1.5;
+		sound_pain (self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+	}
+};
+
 void(entity attacker, float damage)	deathmonger_pain =
 {
 	if (self.pain_finished > time)
 		return;
 
-	sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+		dm_pain_sound(); // added this to lessen spamy pain sound - dumptruck_ds
+ // sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
 
 	if (time - self.pain_finished > 5)
 	{	// always go into pain frame if it has been a while
@@ -231,7 +342,8 @@ void(entity attacker, float damage)	deathmonger_pain =
 		return;
 	}
 
-	if ((random() * 30 > damage))
+	if ((random() * 90 > damage))
+	// if ((random() * 30 > damage))
 		return;		// didn't flinch
 
 	self.pain_finished = time + 1;
@@ -268,12 +380,6 @@ void()	deathmonger_dieb4	=[	$deathb4,	deathmonger_dieb4	] {
 
 void() deathmonger_die =
 {
-	/*
-	if (skill < 2)
-		QCC_ThrowArmorshard();
-	QCC_ThrowArmorshard();
-	*/
-
 	// check for gib
 	if (self.health < -40)
 	{
@@ -327,12 +433,6 @@ void() monster_death_monger =
 	precache_sound("knight/sword1.wav");
 	precache_sound("knight/sword2.wav");
 
-	// if (ExtSupported("EX_SPRINT")) {
-	// 	self.killstring = "$qc_ks_deathmonger";
-	// 	self.netname = "$qc_death_monger";
-	// }
-	// else {
-	// 	self.killstring = " was hammer dropped by a Death Monger\n";
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
 
@@ -341,29 +441,30 @@ void() monster_death_monger =
 	setsize (self, '-16 -16 -24', '16 16 40');
 
 	self.netname = "Death Monger";
-	// }
-	if (!self.health) //thanks RennyC -- dumptruck_ds
-	self.health = 1000;
-	self.max_health = self.health;
+
+	if (!self.health)
+	{
+		if (skill == 0)
+			self.health = 750;
+		else
+			self.health = 2500;
+	}
+
+	self.max_health = self.health; // thanks 4LT -dumptruck_ds
 
 	if (!self.proj_speed_mod)
 	{
 		self.proj_speed_mod = 1;
 	}
 
-	// self.allowPathFind = TRUE;
-	// self.combat_style = CS_MIXED;
-	//self.qccFlags |= QCC_FL_FIREPROOF;
-
 	self.th_stand = deathmonger_stand1;
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
 	self.th_melee = deathmonger_melee1;
+	// self.th_missile = SUB_Null;
 	self.th_missile = deathmonger_magic1;
 	self.th_pain = deathmonger_pain;
-	self.th_pain = SUB_NullPain;
 	self.th_die = deathmonger_die;
 
 	walkmonster_start ();
-	// InitMonster("progs/deathmonger.mdl", MONSTER_TYPE_WALK, MONSTER_SIZE_SMALL);
 };
