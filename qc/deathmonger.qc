@@ -144,7 +144,7 @@ void() deathmonger_melee14 =[ $melee14, deathmonger_melee15 ] {ai_face();};
 // Hammer impact (WIP Paril method)
 void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
 
-	T_RadiusDamage (self, self.owner, 120, self);
+	T_RadiusDamage (self, self.owner, 120, world);
 
 	makevectors(self.angles);
 
@@ -173,8 +173,8 @@ void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
 // Hammer impact (WIP Voidforce method)
 
 // constants
-#define DISTANCE_TERMINATOR 384 // no force applied after this point
-#define DISTANCE_FADETOMIN 256 // only minimal force applied after this point
+#define DISTANCE_TERMINATOR 768 // no force applied after this point
+#define DISTANCE_FADETOMIN 512 // only minimal force applied after this point
 #define MINIMAL_FORCE 0.5
 // #define DISTANCE_TERMINATOR 192 // no force applied after this point
 // #define DISTANCE_FADETOMIN 128 // only minimal force applied after this point
@@ -199,7 +199,7 @@ void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
     exp.solid = SOLID_NOT;
 
 // uses exp origin to calculate radius damage falloff
-    T_RadiusDamage (exp, self, 90, self);
+    T_RadiusDamage (exp, self, 120, self);
 
 // calculating raw value of distance from impact point to the player's center point, store in falloff
     direction = self.enemy.origin - offset;
@@ -226,6 +226,7 @@ void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
     WriteCoord (MSG_BROADCAST, exp.origin_y);
     WriteCoord (MSG_BROADCAST, exp.origin_z);
 };
+
 void() deathmonger_melee16 =[ $melee16, deathmonger_melee17 ] {};
 void() deathmonger_melee17 =[ $melee17, deathmonger_melee18 ] {};
 void() deathmonger_melee18 =[ $melee18, deathmonger_melee19 ] {};
@@ -234,7 +235,6 @@ void() deathmonger_melee20 =[ $melee20, deathmonger_melee21 ] {};
 void() deathmonger_melee21 =[ $melee21, deathmonger_melee22 ] {};
 void() deathmonger_melee22 =[ $melee22, deathmonger_melee23 ] {};
 void() deathmonger_melee23 =[ $melee23, deathmonger_run1 ] {};
-
 
 /* MAGIC ATTACK =========================================================================
 Fires homing fireballs?
@@ -335,7 +335,8 @@ void(entity attacker, float damage)	deathmonger_pain =
 		dm_pain_sound(); // added this to lessen spamy pain sound - dumptruck_ds
  // sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
 
-	if (time - self.pain_finished > 5)
+	if (time - self.pain_finished > 7)
+	// if (time - self.pain_finished > 5)
 	{	// always go into pain frame if it has been a while
 		deathmonger_pain1();
 		self.pain_finished = time + 1;
@@ -349,7 +350,17 @@ void(entity attacker, float damage)	deathmonger_pain =
 	self.pain_finished = time + 1;
 	deathmonger_pain1();
 };
-
+void() deathmonger_kaboom = //explodes after normal death
+{
+		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
+		self.style = 1;  //sets play_meatspray to larger gibbing style
+		play_meatspray();
+		self.origin = self.origin + '0 0 16';
+		play_meatspray();
+		self.origin = self.origin + '0 0 8';
+		GrenadeExplode();
+		return;
+};
 
 // DEATH ============================================================================
 void()	deathmonger_diea1	=[	$deatha1,	deathmonger_diea2	] {};
@@ -363,6 +374,12 @@ void()	deathmonger_diea4	=[	$deatha4,	deathmonger_diea4	] {
 		self.walkframe += 1;
 	}
 	self.frame = $deatha1 + self.walkframe;
+	if (self.walkframe > 15)
+	{
+		self.think = deathmonger_kaboom;
+		self.nextthink = time + 2;
+	}
+	SUB_UseTargets ();
 };
 
 void()	deathmonger_dieb1	=[	$deathb1,	deathmonger_dieb2	] {};
@@ -376,6 +393,12 @@ void()	deathmonger_dieb4	=[	$deathb4,	deathmonger_dieb4	] {
 		self.walkframe += 1;
 	}
 	self.frame = $deathb1 + self.walkframe;
+	if (self.walkframe > 12)
+	{
+		self.think = deathmonger_kaboom;
+		self.nextthink = time + 2;
+	}
+	SUB_UseTargets ();
 };
 
 void() deathmonger_die =
