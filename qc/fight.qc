@@ -149,6 +149,11 @@ float() CheckAttack =
 	}
 	else if (enemy_range == RANGE_NEAR)
 	{
+		if (self.classname == "monster_death_monger") // do melee more often please - dumptruck_ds
+		{
+			deathmonger_melee1();
+			dprint("deathmonger_melee1\n");
+		}
 		if (self.th_melee)
 			chance = 0.2;
 		else

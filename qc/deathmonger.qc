@@ -173,14 +173,11 @@ void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
 // Hammer impact (WIP Voidforce method)
 
 // constants
-#define DISTANCE_TERMINATOR 768 // no force applied after this point
-#define DISTANCE_FADETOMIN 512 // only minimal force applied after this point
-#define MINIMAL_FORCE 0.5
-// #define DISTANCE_TERMINATOR 192 // no force applied after this point
-// #define DISTANCE_FADETOMIN 128 // only minimal force applied after this point
-// #define MINIMAL_FORCE 0.3
-#define PUSH_POWER 600
-#define PUSH_POWER_VERTICAL 270
+#define DISTANCE_TERMINATOR 320 // 192 no force applied after this point
+#define DISTANCE_FADETOMIN 128 // 128 only minimal force applied after this point
+#define MINIMAL_FORCE 0.3 // 0.3
+#define PUSH_POWER 1200 // 600
+#define PUSH_POWER_VERTICAL 512 // 270
 
 void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
 
@@ -199,7 +196,7 @@ void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
     exp.solid = SOLID_NOT;
 
 // uses exp origin to calculate radius damage falloff
-    T_RadiusDamage (exp, self, 120, self);
+    T_RadiusDamage (exp, self, 120, self); //120
 
 // calculating raw value of distance from impact point to the player's center point, store in falloff
     direction = self.enemy.origin - offset;
