@@ -25,6 +25,36 @@
 /////////////////////////////
 // spawn_tfog (self.origin + v_forward*96); 96 units in front
 /////////////////////////////
+/*
+// Hammer impact (WIP Paril method)
+void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
+
+	T_RadiusDamage (self, self.owner, 120, world);
+
+	makevectors(self.angles);
+
+	local entity exp;
+
+	exp = spawn();
+	exp.origin = self.origin + v_forward*88;
+	exp.velocity = '0 0 72';
+	exp.touch = SUB_Null;
+	setmodel (exp, "progs/s_null.spr");
+	exp.solid = SOLID_NOT;
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+	WriteCoord (MSG_BROADCAST, exp.origin_x);
+	WriteCoord (MSG_BROADCAST, exp.origin_y);
+	WriteCoord (MSG_BROADCAST, exp.origin_z);
+
+	vector c = normalize(self.enemy.origin - self.origin);
+	self.enemy.velocity += c * 600;
+	self.enemy.velocity.z += 200;
+	// self.enemy.velocity += c * 600;
+	// self.enemy.velocity.z += 100;
+
+};
+*/
 
 /*
 ==============================================================================
@@ -63,7 +93,6 @@ void() deathmonger_idle_sound =
 	}
 };
 
-
 // STAND ===========================================================================
 void()	deathmonger_stand1	=[	$stand1,	deathmonger_stand2	] {ai_stand();};
 void()	deathmonger_stand2	=[	$stand2,	deathmonger_stand3	] {ai_stand();};
@@ -81,7 +110,6 @@ void()	deathmonger_stand13	=[	$stand5,	deathmonger_stand14	] {ai_stand();};
 void()	deathmonger_stand14	=[	$stand4,	deathmonger_stand15	] {ai_stand();};
 void()	deathmonger_stand15	=[	$stand3,	deathmonger_stand16	] {ai_stand();};
 void()	deathmonger_stand16	=[	$stand2,	deathmonger_stand1	] {ai_stand();};
-
 
 // WALK ===========================================================================
 void()	deathmonger_walk1	=[	$walk1,		deathmonger_walk2	] {
@@ -108,7 +136,6 @@ void()	deathmonger_walk18	=[	$walk18,	deathmonger_walk19	] {ai_walk(3);};
 void()	deathmonger_walk19	=[	$walk19,	deathmonger_walk20	] {ai_walk(3);};
 void()	deathmonger_walk20	=[	$walk20,	deathmonger_walk1	] {ai_walk(2);};
 
-
 // RUN ===========================================================================
 void()	deathmonger_run1	=[	$run1,		deathmonger_run2	] {
 	deathmonger_idle_sound();
@@ -122,6 +149,96 @@ void()	deathmonger_run5	=[	$run5,		deathmonger_run6	] {ai_run(14);};
 void()	deathmonger_run6	=[	$run6,		deathmonger_run7	] {ai_run(25);};
 void()	deathmonger_run7	=[	$run7,		deathmonger_run8	] {ai_run(21);};
 void()	deathmonger_run8	=[	$run8,		deathmonger_run1	] {ai_run(13);};
+
+/* JUMP + MELEE ATTACK =========================================================================
+Big overhead swing.
+*/
+void() deathmonger_meleeJ1  =[ $melee1,  deathmonger_meleeJ2  ] {ai_face();};
+void() deathmonger_meleeJ2  =[ $melee2,  deathmonger_meleeJ3  ] {ai_face();};
+void() deathmonger_meleeJ3  =[ $melee3,  deathmonger_meleeJ4  ] {ai_face();};
+void() deathmonger_meleeJ4  =[ $melee4,  deathmonger_meleeJ5  ] {ai_face();};
+void() deathmonger_meleeJ5  =[ $melee5,  deathmonger_meleeJ6  ] {ai_face();};
+void() deathmonger_meleeJ6  =[ $melee6,  deathmonger_meleeJ7  ] {ai_face();};
+void() deathmonger_meleeJ7  =[ $melee7,  deathmonger_meleeJ8  ] {ai_face();};
+void() deathmonger_meleeJ8  =[ $melee8,  deathmonger_meleeJ9  ] {ai_face();};
+void() deathmonger_meleeJ9  =[ $melee9,  deathmonger_meleeJ10 ] {ai_face();};
+void() deathmonger_meleeJ10 =[ $melee10, deathmonger_meleeJ11 ] {ai_face();};
+void() deathmonger_meleeJ11 =[ $melee11, deathmonger_meleeJ12 ] {ai_face();};
+void() deathmonger_meleeJ12 =[ $melee12, deathmonger_meleeJ13 ] {ai_face();};
+void() deathmonger_meleeJ13 =[ $melee13, deathmonger_meleeJ14 ] {ai_face();
+	makevectors (self.angles);
+	self.origin_z = self.origin_z + 1;
+	self.velocity = v_forward * 900 + '0 0 250'; // 600
+	if (self.flags & FL_ONGROUND)
+		self.flags = self.flags - FL_ONGROUND;
+};
+void() deathmonger_meleeJ14 =[ $melee13, deathmonger_meleeJ15 ] {ai_face();};
+void() deathmonger_meleeJ15 =[ $melee13, deathmonger_meleeJ16 ] {ai_face();};
+void() deathmonger_meleeJ16 =[ $melee13, deathmonger_meleeJ17 ] {ai_face();};
+void() deathmonger_meleeJ17 =[ $melee13, deathmonger_meleeJ18 ] {ai_face();};
+void() deathmonger_meleeJ18 =[ $melee13, deathmonger_meleeJ19 ] {ai_face();};
+void() deathmonger_meleeJ19 =[ $melee14, deathmonger_meleeJ20 ] {ai_face();};
+// Hammer impact (Voidforce method)
+// constants
+#define DISTANCE_TERMINATOR 320 // 192 no force applied after this point
+#define DISTANCE_FADETOMIN 128 // 128 only minimal force applied after this point
+#define MINIMAL_FORCE 0.3 // 0.3
+#define PUSH_POWER 1200 // 600
+#define PUSH_POWER_VERTICAL 512 // 270
+
+void() deathmonger_meleeJ20 =[ $melee15, deathmonger_meleeJ21 ] {
+
+		ai_face();
+    vector offset, direction;
+    entity exp;
+    float falloff;
+
+    makevectors(self.angles);
+    offset = [self.origin_x + v_forward_x * 88, self.origin_y + v_forward_y * 88, self.absmin_z];
+
+    exp = spawn();
+    exp.origin = offset; // spawn explosion in the actual impact point
+    exp.touch = SUB_Null;
+    setmodel (exp, "progs/s_null.spr");
+    exp.solid = SOLID_NOT;
+
+// uses exp origin to calculate radius damage falloff
+    T_RadiusDamage (exp, self, 120, self); //120
+
+// calculating raw value of distance from impact point to the player's center point, store in falloff
+    direction = self.enemy.origin - offset;
+    falloff = vlen(direction);
+
+// if player is close enough
+    if (falloff < DISTANCE_TERMINATOR)
+    {
+        if (falloff > DISTANCE_FADETOMIN)
+            falloff = MINIMAL_FORCE;
+        else
+        // calculatig falloff fade amount, in this case raw value (falloff) is in range [0..DISTANCE_FADETOMIN]
+            falloff = falloff / DISTANCE_FADETOMIN;
+
+    // now apply the push
+    // set directional vector to length of 1
+        direction = normalize(direction);
+        self.enemy.velocity += [direction_x * PUSH_POWER * falloff, direction_y * PUSH_POWER * falloff, PUSH_POWER_VERTICAL * falloff];
+    }
+
+    WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+    WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+    WriteCoord (MSG_BROADCAST, exp.origin_x);
+    WriteCoord (MSG_BROADCAST, exp.origin_y);
+    WriteCoord (MSG_BROADCAST, exp.origin_z);
+};
+
+void() deathmonger_meleeJ21 =[ $melee16, deathmonger_meleeJ22 ] {};
+void() deathmonger_meleeJ22 =[ $melee17, deathmonger_meleeJ23 ] {};
+void() deathmonger_meleeJ23 =[ $melee18, deathmonger_meleeJ24 ] {};
+void() deathmonger_meleeJ24 =[ $melee19, deathmonger_meleeJ25 ] {};
+void() deathmonger_meleeJ25 =[ $melee20, deathmonger_meleeJ26 ] {};
+void() deathmonger_meleeJ26 =[ $melee21, deathmonger_meleeJ27 ] {};
+void() deathmonger_meleeJ27 =[ $melee22, deathmonger_meleeJ28 ] {};
+void() deathmonger_meleeJ28 =[ $melee23, deathmonger_run1 ] {};
 
 /* MELEE ATTACK =========================================================================
 Big overhead swing.
@@ -140,38 +257,7 @@ void() deathmonger_melee11 =[ $melee11, deathmonger_melee12 ] {ai_face();};
 void() deathmonger_melee12 =[ $melee12, deathmonger_melee13 ] {ai_face();};
 void() deathmonger_melee13 =[ $melee13, deathmonger_melee14 ] {ai_face();};
 void() deathmonger_melee14 =[ $melee14, deathmonger_melee15 ] {ai_face();};
-/*
-// Hammer impact (WIP Paril method)
-void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
-
-	T_RadiusDamage (self, self.owner, 120, world);
-
-	makevectors(self.angles);
-
-	local entity exp;
-
-	exp = spawn();
-	exp.origin = self.origin + v_forward*88;
-	exp.velocity = '0 0 72';
-	exp.touch = SUB_Null;
-	setmodel (exp, "progs/s_null.spr");
-	exp.solid = SOLID_NOT;
-	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
-	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
-	WriteCoord (MSG_BROADCAST, exp.origin_x);
-	WriteCoord (MSG_BROADCAST, exp.origin_y);
-	WriteCoord (MSG_BROADCAST, exp.origin_z);
-
-	vector c = normalize(self.enemy.origin - self.origin);
-	self.enemy.velocity += c * 600;
-	self.enemy.velocity.z += 200;
-	// self.enemy.velocity += c * 600;
-	// self.enemy.velocity.z += 100;
-
-};
-*/
 // Hammer impact (WIP Voidforce method)
-
 // constants
 #define DISTANCE_TERMINATOR 320 // 192 no force applied after this point
 #define DISTANCE_FADETOMIN 128 // 128 only minimal force applied after this point
@@ -278,6 +364,34 @@ void() deathmonger_magic23 =[ $magic23, deathmonger_magic24 ] {ai_face();};
 void() deathmonger_magic24 =[ $magic24, deathmonger_magic25 ] {ai_face();};
 void() deathmonger_magic25 =[ $magic25, deathmonger_run1 ] {};
 
+// ATTACK =====================================================================
+
+void() dmChooseAttack =
+{
+	local float chance;
+	chance = 0.9;
+
+	if (enemy_range == RANGE_MELEE)
+		deathmonger_melee1();
+	else if (enemy_range == RANGE_NEAR)
+	{
+		if (random () < chance)
+			{
+				deathmonger_meleeJ1();
+				// dprint ("I choose \bmelee\n");
+			}
+		else
+			{
+				deathmonger_magic1();
+				// dprint ("I choose \bmissiles\n")
+			}
+	}
+	else if (enemy_range == RANGE_MID)
+		deathmonger_magic1();
+	else
+		deathmonger_run1();
+};
+
 //============================================================================
 // Charge animation
 //============================================================================
@@ -297,7 +411,8 @@ void() dmCheckForCharge =
 		return;
 	// charge
 	SUB_AttackFinished (2);
-	deathmonger_run1 ();
+	dmChooseAttack ();
+	// deathmonger_run1 ();
 };
 
 // PAIN ============================================================================
@@ -480,9 +595,11 @@ void() monster_death_monger =
 	self.th_stand = deathmonger_stand1;
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
-	self.th_melee = deathmonger_melee1;
+	self.th_melee = dmChooseAttack;
+	// self.th_melee = deathmonger_melee1;
 	// self.th_missile = SUB_Null;
-	self.th_missile = deathmonger_magic1;
+	self.th_missile = dmChooseAttack;
+	// self.th_missile = deathmonger_magic1;
 	self.th_pain = deathmonger_pain;
 	self.th_die = deathmonger_die;
 
