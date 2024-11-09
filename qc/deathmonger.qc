@@ -93,6 +93,47 @@ void() deathmonger_idle_sound =
 	}
 };
 
+// WAKE / REST BETWEEN MODES ==================================================
+
+void()	deathmonger_wake1	=[	$stand1,	deathmonger_wake2	] {};
+void()	deathmonger_wake2	=[	$stand2,	deathmonger_wake3	] {};
+void()	deathmonger_wake3	=[	$stand3,	deathmonger_wake4	] {};
+void()	deathmonger_wake4	=[	$stand4,	deathmonger_wake5	] {};
+void()	deathmonger_wake5	=[	$stand5,	deathmonger_wake6	] {};
+void()	deathmonger_wake6	=[	$stand6,	deathmonger_wake7	] {};
+void()	deathmonger_wake7	=[	$stand7,	deathmonger_wake8	] {};
+void()	deathmonger_wake8	=[	$stand8,	deathmonger_wake9	] {};
+void()	deathmonger_wake9	=[	$stand9,	deathmonger_wake10	] {};
+void() deathmonger_wake10  =[ $magic1,  deathmonger_wake11  ] {};
+void() deathmonger_wake11  =[ $magic2,  deathmonger_wake12  ] {};
+void() deathmonger_wake12  =[ $magic3,  deathmonger_wake13  ] {};
+void() deathmonger_wake13  =[ $magic4,  deathmonger_wake14 ] {};
+void() deathmonger_wake14  =[ $magic5,  deathmonger_wake15  ] {};
+void() deathmonger_wake15  =[ $magic5,  deathmonger_wake16  ] {};
+void() deathmonger_wake16  =[ $magic5,  deathmonger_wake17  ] {};
+void() deathmonger_wake17  =[ $magic5,  deathmonger_wake18  ] {};
+void() deathmonger_wake18  =[ $magic5,  deathmonger_wake19  ] {};
+void() deathmonger_wake19 =[ $magic5,  deathmonger_wake20  ] {};
+void() deathmonger_wake20 =[ $magic5,  deathmonger_wake21  ] {};
+void() deathmonger_wake21 =[ $magic5,  deathmonger_wake22  ] {};
+void() deathmonger_wake22  =[ $magic5,  deathmonger_wake23  ] {};
+void() deathmonger_wake23  =[ $magic5,  deathmonger_wake24  ] {};
+void() deathmonger_wake24  =[ $magic5,  deathmonger_wake25  ] {};
+void() deathmonger_wake25  =[ $magic5,  deathmonger_wake26  ] {};
+void() deathmonger_wake26  =[ $magic5,  deathmonger_wake27  ] {};
+void() deathmonger_wake27  =[ $magic5,  deathmonger_wake28  ] {};
+void() deathmonger_wake28  =[ $magic5,  deathmonger_wake29  ] {};
+void() deathmonger_wake29  =[ $magic5,  deathmonger_wake30  ] {};
+void() deathmonger_wake30  =[ $magic5,  deathmonger_wake31  ] {};
+void() deathmonger_wake31  =[ $magic5,  deathmonger_wake32  ] {};
+void() deathmonger_wake32  =[ $magic5,  deathmonger_wake33  ] {};
+void() deathmonger_wake33  =[ $magic5,  deathmonger_wake34  ] {};
+void()	deathmonger_wake34	=[	$magic4,	deathmonger_wake35	] {};
+void()	deathmonger_wake35	=[	$magic3,	deathmonger_wake36	] {};
+void()	deathmonger_wake36	=[	$magic2,	deathmonger_wake37	] {};
+void()	deathmonger_wake37	=[	$magic1,	deathmonger_wake38	] {};
+void()	deathmonger_wake38	=[	$stand1,	deathmonger_stand1	] {};
+
 // STAND ===========================================================================
 void()	deathmonger_stand1	=[	$stand1,	deathmonger_stand2	] {ai_stand();};
 void()	deathmonger_stand2	=[	$stand2,	deathmonger_stand3	] {ai_stand();};
@@ -592,7 +633,8 @@ void() monster_death_monger =
 		self.proj_speed_mod = 1;
 	}
 
-	self.th_stand = deathmonger_stand1;
+	self.th_stand = deathmonger_wake1;
+	// self.th_stand = deathmonger_stand1;
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
 	self.th_melee = dmChooseAttack;
