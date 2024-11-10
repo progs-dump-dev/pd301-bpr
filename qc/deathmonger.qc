@@ -92,10 +92,65 @@ void() deathmonger_idle_sound =
 		sound(self, CHAN_VOICE, "hknight/idle.wav", 1, ATTN_NORM);
 	}
 };
+// // shake the screen when Deathmonger arrives -dumptruck_ds
+// void(entity pl, float dist) dm_shake_think =
+// {
+// 	if (pl.flags & FL_CLIENT)
+// 	{
+// 		pl.punchangle_x = -1.5 * (random() + 5);
+// 		pl.punchangle_y = -0.5 * (random() + 5);
+// 		pl.punchangle_z = -0.25 * (random() + 5);
+//  	}
+// };
+//
+// void() dm_shake =
+// {
+// 		entity pl;
+// 		float dist;
+//
+// 		pl = find(world, classname, "player") ;
+//
+// 		while (pl)
+// 		{
+// 		  dist = vlen(self.origin - pl.origin);
+// 		  dm_shake_think(pl, dist);
+// 		  pl = find(pl, classname, "player") ;
+// 		}
+// };
+
+void() dmGibShower =
+{
+	local entity shower;
+	// local float r;
+	//
+	// r = random() * 2 - 1;
+
+	makevectors(self.angles);
+
+	shower = spawn();
+	shower.owner = self;
+	shower.solid = SOLID_NOT;
+	shower.movetype = MOVETYPE_NOCLIP;
+	// shower.origin = self.origin + '0 0 128' + r * 64 * v_right;
+	shower.origin = self.origin + '0 0 112';
+	// shower.angles = self.angles;
+	// shower.classname = "shower";
+	shower.style = 0;
+	shower.nextthink = time;
+	shower.think = play_meatspray;
+
+	if (random() < 0.5)
+		sound (self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NORM);
+	else
+		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
+
+}
 
 // WAKE / REST BETWEEN MODES ==================================================
 
-void()	deathmonger_wake1	=[	$stand1,	deathmonger_wake2	] {};
+void()	deathmonger_wake1	=[	$stand1,	deathmonger_wake2	] {
+//no damage during wake up -dumptruck_ds
+self.takedamage = DAMAGE_NO;};
 void()	deathmonger_wake2	=[	$stand2,	deathmonger_wake3	] {};
 void()	deathmonger_wake3	=[	$stand3,	deathmonger_wake4	] {};
 void()	deathmonger_wake4	=[	$stand4,	deathmonger_wake5	] {};
@@ -108,21 +163,21 @@ void() deathmonger_wake10  =[ $magic1,  deathmonger_wake11  ] {};
 void() deathmonger_wake11  =[ $magic2,  deathmonger_wake12  ] {};
 void() deathmonger_wake12  =[ $magic3,  deathmonger_wake13  ] {};
 void() deathmonger_wake13  =[ $magic4,  deathmonger_wake14 ] {};
-void() deathmonger_wake14  =[ $magic5,  deathmonger_wake15  ] {};
+void() deathmonger_wake14  =[ $magic5,  deathmonger_wake15  ] {dmGibShower();};
 void() deathmonger_wake15  =[ $magic5,  deathmonger_wake16  ] {};
 void() deathmonger_wake16  =[ $magic5,  deathmonger_wake17  ] {};
 void() deathmonger_wake17  =[ $magic5,  deathmonger_wake18  ] {};
 void() deathmonger_wake18  =[ $magic5,  deathmonger_wake19  ] {};
 void() deathmonger_wake19 =[ $magic5,  deathmonger_wake20  ] {};
 void() deathmonger_wake20 =[ $magic5,  deathmonger_wake21  ] {};
-void() deathmonger_wake21 =[ $magic5,  deathmonger_wake22  ] {};
+void() deathmonger_wake21 =[ $magic5,  deathmonger_wake22  ] {dmGibShower();};
 void() deathmonger_wake22  =[ $magic5,  deathmonger_wake23  ] {};
 void() deathmonger_wake23  =[ $magic5,  deathmonger_wake24  ] {};
 void() deathmonger_wake24  =[ $magic5,  deathmonger_wake25  ] {};
 void() deathmonger_wake25  =[ $magic5,  deathmonger_wake26  ] {};
 void() deathmonger_wake26  =[ $magic5,  deathmonger_wake27  ] {};
 void() deathmonger_wake27  =[ $magic5,  deathmonger_wake28  ] {};
-void() deathmonger_wake28  =[ $magic5,  deathmonger_wake29  ] {};
+void() deathmonger_wake28  =[ $magic5,  deathmonger_wake29  ] {dmGibShower();};
 void() deathmonger_wake29  =[ $magic5,  deathmonger_wake30  ] {};
 void() deathmonger_wake30  =[ $magic5,  deathmonger_wake31  ] {};
 void() deathmonger_wake31  =[ $magic5,  deathmonger_wake32  ] {};
@@ -132,7 +187,10 @@ void()	deathmonger_wake34	=[	$magic4,	deathmonger_wake35	] {};
 void()	deathmonger_wake35	=[	$magic3,	deathmonger_wake36	] {};
 void()	deathmonger_wake36	=[	$magic2,	deathmonger_wake37	] {};
 void()	deathmonger_wake37	=[	$magic1,	deathmonger_wake38	] {};
-void()	deathmonger_wake38	=[	$stand1,	deathmonger_stand1	] {};
+void()	deathmonger_wake38	=[	$stand1,	deathmonger_stand1	] {
+//Okay you can damage me now that the cool animation is completed -dumptruck_ds
+self.takedamage = DAMAGE_AIM;
+};
 
 // STAND ===========================================================================
 void()	deathmonger_stand1	=[	$stand1,	deathmonger_stand2	] {ai_stand();};
@@ -608,6 +666,7 @@ void() monster_death_monger =
 
 	precache_sound("knight/sword1.wav");
 	precache_sound("knight/sword2.wav");
+	// precache_sound("dump/rumblout.wav");
 
 	self.solid = SOLID_SLIDEBOX;
 	self.movetype = MOVETYPE_STEP;
