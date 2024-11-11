@@ -86,37 +86,18 @@ $frame deatha10 deatha11 deatha12 deatha13 deatha14 deatha15 deatha16 deatha17
 $frame deathb1 deathb2 deathb3 deathb4 deathb5 deathb6 deathb7 deathb8
 $frame deathb9 deathb10 deathb11 deathb12 deathb13 deathb14
 
+#define DISTANCE_TERMINATOR 320 // 192 no force applied after this point
+#define DISTANCE_FADETOMIN 128 // 128 only minimal force applied after this point
+#define MINIMAL_FORCE 0.3 // 0.3
+#define PUSH_POWER 900 // 600
+#define PUSH_POWER_VERTICAL 384 // 270
+
 void() deathmonger_idle_sound =
 {
 	if (random() < 0.2) {
 		sound(self, CHAN_VOICE, "hknight/idle.wav", 1, ATTN_NORM);
 	}
 };
-// // shake the screen when Deathmonger arrives -dumptruck_ds
-// void(entity pl, float dist) dm_shake_think =
-// {
-// 	if (pl.flags & FL_CLIENT)
-// 	{
-// 		pl.punchangle_x = -1.5 * (random() + 5);
-// 		pl.punchangle_y = -0.5 * (random() + 5);
-// 		pl.punchangle_z = -0.25 * (random() + 5);
-//  	}
-// };
-//
-// void() dm_shake =
-// {
-// 		entity pl;
-// 		float dist;
-//
-// 		pl = find(world, classname, "player") ;
-//
-// 		while (pl)
-// 		{
-// 		  dist = vlen(self.origin - pl.origin);
-// 		  dm_shake_think(pl, dist);
-// 		  pl = find(pl, classname, "player") ;
-// 		}
-// };
 
 void() dmGibShower =
 {
@@ -131,10 +112,7 @@ void() dmGibShower =
 	shower.owner = self;
 	shower.solid = SOLID_NOT;
 	shower.movetype = MOVETYPE_NOCLIP;
-	// shower.origin = self.origin + '0 0 128' + r * 64 * v_right;
 	shower.origin = self.origin + '0 0 112';
-	// shower.angles = self.angles;
-	// shower.classname = "shower";
 	shower.style = 0;
 	shower.nextthink = time;
 	shower.think = play_meatspray;
@@ -188,7 +166,7 @@ void()	deathmonger_wake35	=[	$magic3,	deathmonger_wake36	] {};
 void()	deathmonger_wake36	=[	$magic2,	deathmonger_wake37	] {};
 void()	deathmonger_wake37	=[	$magic1,	deathmonger_wake38	] {};
 void()	deathmonger_wake38	=[	$stand1,	deathmonger_stand1	] {
-//Okay you can damage me now that the cool animation is completed -dumptruck_ds
+//Okay you can damage me now that the cool animation is finished -dumptruck_ds
 self.takedamage = DAMAGE_AIM;
 };
 
@@ -264,10 +242,11 @@ void() deathmonger_meleeJ9  =[ $melee9,  deathmonger_meleeJ10 ] {ai_face();};
 void() deathmonger_meleeJ10 =[ $melee10, deathmonger_meleeJ11 ] {ai_face();};
 void() deathmonger_meleeJ11 =[ $melee11, deathmonger_meleeJ12 ] {ai_face();};
 void() deathmonger_meleeJ12 =[ $melee12, deathmonger_meleeJ13 ] {ai_face();};
-void() deathmonger_meleeJ13 =[ $melee13, deathmonger_meleeJ14 ] {ai_face();
+void() deathmonger_meleeJ13 =[ $melee13, deathmonger_meleeJ14 ] {
+	ai_face();
 	makevectors (self.angles);
 	self.origin_z = self.origin_z + 1;
-	self.velocity = v_forward * 900 + '0 0 250'; // 600
+	self.velocity = v_forward * 750 + '0 0 250'; // 600
 	if (self.flags & FL_ONGROUND)
 		self.flags = self.flags - FL_ONGROUND;
 };
@@ -277,14 +256,8 @@ void() deathmonger_meleeJ16 =[ $melee13, deathmonger_meleeJ17 ] {ai_face();};
 void() deathmonger_meleeJ17 =[ $melee13, deathmonger_meleeJ18 ] {ai_face();};
 void() deathmonger_meleeJ18 =[ $melee13, deathmonger_meleeJ19 ] {ai_face();};
 void() deathmonger_meleeJ19 =[ $melee14, deathmonger_meleeJ20 ] {ai_face();};
-// Hammer impact (Voidforce method)
-// constants
-#define DISTANCE_TERMINATOR 320 // 192 no force applied after this point
-#define DISTANCE_FADETOMIN 128 // 128 only minimal force applied after this point
-#define MINIMAL_FORCE 0.3 // 0.3
-#define PUSH_POWER 1200 // 600
-#define PUSH_POWER_VERTICAL 512 // 270
 
+// Hammer impact (thank you Voidforce!)
 void() deathmonger_meleeJ20 =[ $melee15, deathmonger_meleeJ21 ] {
 
 		ai_face();
@@ -339,9 +312,9 @@ void() deathmonger_meleeJ26 =[ $melee21, deathmonger_meleeJ27 ] {};
 void() deathmonger_meleeJ27 =[ $melee22, deathmonger_meleeJ28 ] {};
 void() deathmonger_meleeJ28 =[ $melee23, deathmonger_run1 ] {};
 
-/* MELEE ATTACK =========================================================================
-Big overhead swing.
-*/
+// /* MELEE ATTACK =========================================================================
+// Big overhead swing.
+// */
 void() deathmonger_melee1  =[ $melee1,  deathmonger_melee2  ] {ai_face();};
 void() deathmonger_melee2  =[ $melee2,  deathmonger_melee3  ] {ai_face();};
 void() deathmonger_melee3  =[ $melee3,  deathmonger_melee4  ] {ai_face();};
@@ -356,14 +329,9 @@ void() deathmonger_melee11 =[ $melee11, deathmonger_melee12 ] {ai_face();};
 void() deathmonger_melee12 =[ $melee12, deathmonger_melee13 ] {ai_face();};
 void() deathmonger_melee13 =[ $melee13, deathmonger_melee14 ] {ai_face();};
 void() deathmonger_melee14 =[ $melee14, deathmonger_melee15 ] {ai_face();};
-// Hammer impact (WIP Voidforce method)
-// constants
-#define DISTANCE_TERMINATOR 320 // 192 no force applied after this point
-#define DISTANCE_FADETOMIN 128 // 128 only minimal force applied after this point
-#define MINIMAL_FORCE 0.3 // 0.3
-#define PUSH_POWER 1200 // 600
-#define PUSH_POWER_VERTICAL 512 // 270
 
+
+// Hammer impact (thank you Voidforce!)
 void() deathmonger_melee15 =[ $melee15, deathmonger_melee16 ] {
 
 		ai_face();
@@ -468,7 +436,7 @@ void() deathmonger_magic25 =[ $magic25, deathmonger_run1 ] {};
 void() dmChooseAttack =
 {
 	local float chance;
-	chance = 0.9;
+	chance = 0.6;
 
 	if (enemy_range == RANGE_MELEE)
 		deathmonger_melee1();
@@ -477,12 +445,10 @@ void() dmChooseAttack =
 		if (random () < chance)
 			{
 				deathmonger_meleeJ1();
-				// dprint ("I choose \bmelee\n");
 			}
 		else
 			{
 				deathmonger_magic1();
-				// dprint ("I choose \bmissiles\n")
 			}
 	}
 	else if (enemy_range == RANGE_MID)
@@ -692,8 +658,8 @@ void() monster_death_monger =
 		self.proj_speed_mod = 1;
 	}
 
-	self.th_stand = deathmonger_wake1;
-	// self.th_stand = deathmonger_stand1;
+	// self.th_stand = deathmonger_wake1; // use this for boss version
+	self.th_stand = deathmonger_stand1; // use this for regular version
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
 	self.th_melee = dmChooseAttack;
