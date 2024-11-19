@@ -3514,4 +3514,8 @@ sounds(choices) : "Sound style" : 0 =
 ) = monster_death_monger : "The Death Monger
 Default health = 1000"
 [
+spawnflags(flags) =
+	[
+		2 : "Boss Intro Animation"	: 0
+	]
 ]

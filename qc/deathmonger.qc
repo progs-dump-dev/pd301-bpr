@@ -91,6 +91,7 @@ $frame deathb9 deathb10 deathb11 deathb12 deathb13 deathb14
 #define MINIMAL_FORCE 0.3 // 0.3
 #define PUSH_POWER 900 // 600
 #define PUSH_POWER_VERTICAL 384 // 270
+#define BOSS_VERSION 2
 
 void() deathmonger_idle_sound =
 {
@@ -102,9 +103,6 @@ void() deathmonger_idle_sound =
 void() dmGibShower =
 {
 	local entity shower;
-	// local float r;
-	//
-	// r = random() * 2 - 1;
 
 	makevectors(self.angles);
 
@@ -121,10 +119,9 @@ void() dmGibShower =
 		sound (self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NORM);
 	else
 		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
-
 }
 
-// WAKE / REST BETWEEN MODES ==================================================
+// WAKE / REST BETWEEN STAGES ==================================================
 
 void()	deathmonger_wake1	=[	$stand1,	deathmonger_wake2	] {
 //no damage during wake up -dumptruck_ds
@@ -165,6 +162,7 @@ void()	deathmonger_wake34	=[	$magic4,	deathmonger_wake35	] {};
 void()	deathmonger_wake35	=[	$magic3,	deathmonger_wake36	] {};
 void()	deathmonger_wake36	=[	$magic2,	deathmonger_wake37	] {};
 void()	deathmonger_wake37	=[	$magic1,	deathmonger_wake38	] {};
+// void()	deathmonger_wake38	=[	$stand1,	deathmonger_run1	] {
 void()	deathmonger_wake38	=[	$stand1,	deathmonger_stand1	] {
 //Okay you can damage me now that the cool animation is finished -dumptruck_ds
 self.takedamage = DAMAGE_AIM;
@@ -482,11 +480,13 @@ void() dmCheckForCharge =
 
 // PAIN ============================================================================
 void()	deathmonger_pain1	=[	$pain1,		deathmonger_pain2	] {
+	// self.pain_finished = time + 1.5;
 	sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
 	self.walkframe = 0;
 };
 void()	deathmonger_pain2	=[	$pain2,		deathmonger_run1	] {
 // void()	deathmonger_pain2	=[	$pain2,		deathmonger_pain3	] {
+
 	if (self.walkframe < 10) {
 		self.walkframe += 1;
 		self.frame = $pain1 + self.walkframe;
@@ -495,22 +495,10 @@ void()	deathmonger_pain2	=[	$pain2,		deathmonger_run1	] {
 		deathmonger_run1();
 };
 
-void() dm_pain_sound = // FIXME - make this random selection of pain sounds
-{
-	if (random() < 0.2)
-	{
-		self.pain_finished = time + 1.5;
-		sound_pain (self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
-	}
-};
-
 void(entity attacker, float damage)	deathmonger_pain =
 {
 	if (self.pain_finished > time)
-		return;
-
-		dm_pain_sound(); // added this to lessen spamy pain sound - dumptruck_ds
- // sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+	return;
 
 	if (time - self.pain_finished > 7)
 	// if (time - self.pain_finished > 5)
@@ -538,7 +526,35 @@ void() deathmonger_kaboom = //explodes after normal death
 		GrenadeExplode();
 		return;
 };
-
+// fuck!
+// void() dm_pain_go =
+// {
+// 	if (!self.cnt)
+// 	{
+// 		if (self.health < self.max_health * 0.66)
+// 		{
+// 			dprint("Stage 2 Begins!\n");
+// 			self.cnt = 1;
+// 			deathmonger_wake1();
+// 			return;
+// 		}
+// 	}
+// 	if (self.cnt == 1)
+// 	{
+// 		if (self.health < self.max_health * 0.33)
+// 		{
+// 			dprint("Stage 3 Begins!\n");
+// 			self.cnt = 2;
+// 			deathmonger_wake1();
+// 			return;
+// 		}
+// 	}
+// 	if (self.pain_finished > time)
+// 	return;
+//
+// 	deathmonger_pain1();
+// };
+//
 // DEATH ============================================================================
 void()	deathmonger_diea1	=[	$deatha1,	deathmonger_diea2	] {};
 void()	deathmonger_diea2	=[	$deatha2,	deathmonger_diea3	] {};
@@ -652,13 +668,15 @@ void() monster_death_monger =
 	}
 
 	self.max_health = self.health; // thanks 4LT -dumptruck_ds
+	self.cnt = 0;
 
 	if (!self.proj_speed_mod)
 	{
 		self.proj_speed_mod = 1;
 	}
-
-	// self.th_stand = deathmonger_wake1; // use this for boss version
+	if (self.spawnflags && BOSS_VERSION)
+	self.th_stand = deathmonger_wake1; // use this for boss version
+	else
 	self.th_stand = deathmonger_stand1; // use this for regular version
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
