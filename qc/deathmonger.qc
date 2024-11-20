@@ -162,8 +162,7 @@ void()	deathmonger_wake34	=[	$magic4,	deathmonger_wake35	] {};
 void()	deathmonger_wake35	=[	$magic3,	deathmonger_wake36	] {};
 void()	deathmonger_wake36	=[	$magic2,	deathmonger_wake37	] {};
 void()	deathmonger_wake37	=[	$magic1,	deathmonger_wake38	] {};
-// void()	deathmonger_wake38	=[	$stand1,	deathmonger_run1	] {
-void()	deathmonger_wake38	=[	$stand1,	deathmonger_stand1	] {
+void()	deathmonger_wake38	=[	$stand1,	deathmonger_run1	] {
 //Okay you can damage me now that the cool animation is finished -dumptruck_ds
 self.takedamage = DAMAGE_AIM;
 };
@@ -215,7 +214,7 @@ void()	deathmonger_walk20	=[	$walk20,	deathmonger_walk1	] {ai_walk(2);};
 void()	deathmonger_run1	=[	$run1,		deathmonger_run2	] {
 	deathmonger_idle_sound();
 	ai_run (20);
-	dmCheckForCharge ();
+	// dmCheckForCharge ();
 };
 void()	deathmonger_run2	=[	$run2,		deathmonger_run3	] {ai_run(25);};
 void()	deathmonger_run3	=[	$run3,		deathmonger_run4	] {ai_run(18);};
@@ -480,29 +479,34 @@ void() dmCheckForCharge =
 
 // PAIN ============================================================================
 void()	deathmonger_pain1	=[	$pain1,		deathmonger_pain2	] {
-	// self.pain_finished = time + 1.5;
+	// dprint("PAIN 1\n");
 	sound(self, CHAN_VOICE, "hknight/pain1.wav", 1, ATTN_NORM);
+	self.pain_finished = time + 1.5;
 	self.walkframe = 0;
 };
 void()	deathmonger_pain2	=[	$pain2,		deathmonger_run1	] {
-// void()	deathmonger_pain2	=[	$pain2,		deathmonger_pain3	] {
 
 	if (self.walkframe < 10) {
 		self.walkframe += 1;
 		self.frame = $pain1 + self.walkframe;
 	}
 	else
+		// dmCheckForCharge();
 		deathmonger_run1();
 };
 
 void(entity attacker, float damage)	deathmonger_pain =
 {
 	if (self.pain_finished > time)
-	return;
+	{
+		// dprint("self.pain_finished > time\n");
+		return;
+	}
 
 	if (time - self.pain_finished > 7)
 	// if (time - self.pain_finished > 5)
 	{	// always go into pain frame if it has been a while
+		// dprint("It's been a WHILE!\n");
 		deathmonger_pain1();
 		self.pain_finished = time + 1;
 		return;
@@ -510,10 +514,35 @@ void(entity attacker, float damage)	deathmonger_pain =
 
 	if ((random() * 90 > damage))
 	// if ((random() * 30 > damage))
+	{
+		// dprint("Didn't FLINCH!\n");
 		return;		// didn't flinch
+	}
+ // using shadowoff here as `cnt` was being reset by SUB_AttackFinished Doh! - dumptruck_ds
+	if (!self.shadowoff)
+	{
+		if (self.health < self.max_health * 0.66)
+		{
+			// dprint("\bStage 2 Begins!\n");
+			self.shadowoff = 1;
+			deathmonger_wake1();
+			return;
+		}
+	}
+	if (self.shadowoff == 1)
+	{
+		if (self.health < self.max_health * 0.33)
+		{
+			// dprint("\bStage 3 Begins!\n");
+			self.shadowoff = 2;
+			deathmonger_wake1();
+			return;
+		}
+	}
 
-	self.pain_finished = time + 1;
+	self.pain_finished = time + 1.5;
 	deathmonger_pain1();
+
 };
 void() deathmonger_kaboom = //explodes after normal death
 {
@@ -526,35 +555,7 @@ void() deathmonger_kaboom = //explodes after normal death
 		GrenadeExplode();
 		return;
 };
-// fuck!
-// void() dm_pain_go =
-// {
-// 	if (!self.cnt)
-// 	{
-// 		if (self.health < self.max_health * 0.66)
-// 		{
-// 			dprint("Stage 2 Begins!\n");
-// 			self.cnt = 1;
-// 			deathmonger_wake1();
-// 			return;
-// 		}
-// 	}
-// 	if (self.cnt == 1)
-// 	{
-// 		if (self.health < self.max_health * 0.33)
-// 		{
-// 			dprint("Stage 3 Begins!\n");
-// 			self.cnt = 2;
-// 			deathmonger_wake1();
-// 			return;
-// 		}
-// 	}
-// 	if (self.pain_finished > time)
-// 	return;
-//
-// 	deathmonger_pain1();
-// };
-//
+
 // DEATH ============================================================================
 void()	deathmonger_diea1	=[	$deatha1,	deathmonger_diea2	] {};
 void()	deathmonger_diea2	=[	$deatha2,	deathmonger_diea3	] {};
@@ -668,7 +669,7 @@ void() monster_death_monger =
 	}
 
 	self.max_health = self.health; // thanks 4LT -dumptruck_ds
-	self.cnt = 0;
+	self.shadowoff = 0;
 
 	if (!self.proj_speed_mod)
 	{
@@ -681,10 +682,7 @@ void() monster_death_monger =
 	self.th_walk = deathmonger_walk1;
 	self.th_run = deathmonger_run1;
 	self.th_melee = dmChooseAttack;
-	// self.th_melee = deathmonger_melee1;
-	// self.th_missile = SUB_Null;
 	self.th_missile = dmChooseAttack;
-	// self.th_missile = deathmonger_magic1;
 	self.th_pain = deathmonger_pain;
 	self.th_die = deathmonger_die;
 
