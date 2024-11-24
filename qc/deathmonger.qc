@@ -100,6 +100,25 @@ void() deathmonger_idle_sound =
 	}
 };
 
+//nudge the player a little back so they can see the hammer animation better - dumptruck_ds
+void() dmJumpTouch =
+{
+	if (self.health <= 0)
+		return;
+
+	if ( vlen(self.velocity) > 1 )
+	{
+			if (other.health > 0) // is the player still alive? Preach's instakill bug check - dumptruck_ds
+			{
+					vector c = normalize(self.enemy.origin - self.origin);
+					self.enemy.velocity += c * 600; //600
+					self.enemy.velocity.z += 64; //200
+					// dprint("PUSHED\n");
+					self.touch = monster_touch;
+			}
+	}
+};
+
 void() dmGibShower =
 {
 	local entity shower;
@@ -246,6 +265,7 @@ void() deathmonger_meleeJ13 =[ $melee13, deathmonger_meleeJ14 ] {
 	self.velocity = v_forward * 750 + '0 0 250'; // 600
 	if (self.flags & FL_ONGROUND)
 		self.flags = self.flags - FL_ONGROUND;
+	self.touch = dmJumpTouch;
 };
 void() deathmonger_meleeJ14 =[ $melee13, deathmonger_meleeJ15 ] {ai_face();};
 void() deathmonger_meleeJ15 =[ $melee13, deathmonger_meleeJ16 ] {ai_face();};
@@ -675,7 +695,7 @@ void() monster_death_monger =
 	{
 		self.proj_speed_mod = 1;
 	}
-	if (self.spawnflags && BOSS_VERSION)
+	if (self.spawnflags & BOSS_VERSION)
 	self.th_stand = deathmonger_wake1; // use this for boss version
 	else
 	self.th_stand = deathmonger_stand1; // use this for regular version
