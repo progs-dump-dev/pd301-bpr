@@ -118,8 +118,10 @@ void(vector p) shub_missile =
 
 	setmodel (puff, "progs/s_explod.spr");
 	puff.origin = (org);
-	puff.think = s_explode1;
+	// particle (org, '0 0 0', 75, 255); // explosion effect
+	puff.think = BecomeExplosion;
 	puff.nextthink = time;
+	sound (puff, CHAN_WEAPON, "hknight/attack1.wav", 1, ATTN_NORM);
 
 	launch_spike2 (org, vec, 300); // lavaball in your face!
 	if (self.mdl_proj != "") // dumptruck_ds custom_mdls
