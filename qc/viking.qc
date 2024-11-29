@@ -42,6 +42,8 @@ $frame v3a1 v3a2 v3a3 v3a4 v3a5 v3a6
 void() viking_char_a1;
 void() viking_run1;
 void() v_idle_sound;
+void() vCheckForCharge;
+
 
 //============================================================================
 // Standing

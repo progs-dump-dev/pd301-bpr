@@ -597,7 +597,7 @@ func_laser
 ===============================================================================
 */
 float LASER_SOLID = 2;
-.string		message2;
+// .string		message2; moved to dtmisc - dumptruck_ds
 .float		alpha;
 
 

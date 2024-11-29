@@ -103,12 +103,12 @@ void() deathmonger_idle_sound =
 //nudge the player a little back so they can see the hammer animation better - dumptruck_ds
 void() dmJumpTouch =
 {
-	if (self.health <= 0)
+	if (self.enemy.health <= 0)
 		return;
 
 	if ( vlen(self.velocity) > 1 )
 	{
-			if (other.health > 0) // is the player still alive? Preach's instakill bug check - dumptruck_ds
+			if (self.enemy.health > 0) // is the player still alive? Preach's instakill bug check - dumptruck_ds
 			{
 					vector c = normalize(self.enemy.origin - self.origin);
 					self.enemy.velocity += c * 600; //600

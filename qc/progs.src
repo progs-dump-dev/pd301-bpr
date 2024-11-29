@@ -1,5 +1,5 @@
 ../progs.dat
-#pragma autoproto
+//#pragma autoproto
 
 defs.qc //added fields, see comments for details
 newflags.qc //new spawnflags for all entities

@@ -5,6 +5,7 @@
    All rights reserved.
    Distributed (unsupported) on 3.12.97
 */
+.string		message2;
 
 void() play_sound_use =
    {
@@ -1047,7 +1048,7 @@ void() misc_particle_stream =
 //##########################################
 // Original entity submitted by Jan Martin Mathiassen, aka. TGR
 
-void() heal_think = 
+void() heal_think =
 {
   if (self.cnt == self.count)
   {
@@ -1089,7 +1090,7 @@ void() heal_touch =
 		return;
 
   if(self.count && self.cnt <= 0)
-  { 
+  {
     if(self.message2)
       centerprint(other, self.message2);
     return;
@@ -1112,9 +1113,9 @@ void() heal_touch =
       calculated_healing = self.heal_amount;
 		}
 
-    if (self.count) 
+    if (self.count)
     {
-      
+
       if (calculated_healing > self.cnt)
       {
         calculated_healing = self.cnt;
@@ -1124,7 +1125,7 @@ void() heal_touch =
       {
         self.think = heal_think;
         self.nextthink = time + self.delay;
-      } 
+      }
       dprint("trigger_heal used: [max: ");
       dprint(ftos(self.count));
       dprint(", current: ");
