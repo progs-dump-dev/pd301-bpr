@@ -180,7 +180,7 @@ ATTACKS
 // 	sound_land (self, CHAN_WEAPON, "zombie/z_miss.wav", 1, ATTN_NORM);   // bounce sound
 // };
 
-// void() ZombieGrenadeTouch2 =
+// void() ZombieGrenadeTouch2 = //moved to misc.qc to enable shooter version
 // {
 // 	if (other == self.owner)
 // 		return;         // don't explode on owner

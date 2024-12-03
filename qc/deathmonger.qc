@@ -93,6 +93,8 @@ $frame deathb9 deathb10 deathb11 deathb12 deathb13 deathb14
 #define PUSH_POWER_VERTICAL 384 // 270
 #define BOSS_VERSION 2
 
+void()	deathmonger_walk1;
+
 void() deathmonger_idle_sound =
 {
 	if (random() < 0.2) {
@@ -138,9 +140,111 @@ void() dmGibShower =
 		sound (self, CHAN_VOICE, "player/gib.wav", 1, ATTN_NORM);
 	else
 		sound (self, CHAN_VOICE, "player/udeath.wav", 1, ATTN_NORM);
-}
+};
 
-// WAKE / REST BETWEEN STAGES ==================================================
+void() dmGibTouch = //moved from zombie.qc to enable shooter version
+{
+	if (other == self.owner)
+		return;         // don't explode on owner
+	if (other.takedamage)
+	{
+		T_Damage (other, self, self.owner, 10 );
+		sound (self, CHAN_WEAPON, "zombie/z_hit.wav", 1, ATTN_NORM);
+		remove (self);
+		return;
+	}
+	sound (self, CHAN_WEAPON, "zombie/z_miss.wav", 1, ATTN_NORM);   // bounce sound
+	self.velocity = '0 0 0';
+	self.avelocity = '0 0 0';
+	self.touch = SUB_Remove;
+};
+
+void(vector p) dmGibMissile = // copied from Old One 2 missile attack - dumptruck_ds
+{
+	local	vector	offang;
+	local	vector	org, vec, d;
+	local	float	t;
+
+	offang = vectoangles (self.enemy.origin - self.origin);
+	makevectors (offang);
+
+	org = self.origin + p_x*v_forward + p_y*v_right + p_z*'0 0 1';
+
+// lead the player on hard mode
+	// if ((skill > 1) && (!self.cnt))
+	// {
+		t = vlen(self.enemy.origin - org) / 300;
+		vec = self.enemy.velocity;
+		vec_z = 0;
+		d = self.enemy.origin + t * vec;
+	// }
+	// else
+	// {
+	// 	d = self.enemy.origin;
+	// }
+
+	vec = normalize (d - org);
+
+	launch_spike (org, vec);
+	setmodel (newmis, "progs/zom_gib.mdl");
+	newmis.avelocity = '200 100 300';
+	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);
+	newmis.velocity = vec*1000; // we're not leading the player because this are pretty fast -dumptruck_ds
+	newmis.touch = dmGibTouch; // ouch!
+	sound_attack (self, CHAN_WEAPON, "zombie/z_shot1.wav", 1, ATTN_NORM);
+
+// check for dead enemy
+	if (self.enemy.health <= 0)
+		deathmonger_walk1 ();
+};
+
+// second stage gib attack ==================================================
+
+void()	deathmonger_wake_s2_1	=[	$stand1,	deathmonger_wake_s2_2	] {
+//no damage during wake_s2_ up -dumptruck_ds
+self.takedamage = DAMAGE_NO;};
+void()	deathmonger_wake_s2_2	=[	$stand2,	deathmonger_wake_s2_3	] {};
+void()	deathmonger_wake_s2_3	=[	$stand3,	deathmonger_wake_s2_4	] {};
+void()	deathmonger_wake_s2_4	=[	$stand4,	deathmonger_wake_s2_5	] {};
+void()	deathmonger_wake_s2_5	=[	$stand5,	deathmonger_wake_s2_6	] {};
+void()	deathmonger_wake_s2_6	=[	$stand6,	deathmonger_wake_s2_7	] {};
+void()	deathmonger_wake_s2_7	=[	$stand7,	deathmonger_wake_s2_8	] {};
+void()	deathmonger_wake_s2_8	=[	$stand8,	deathmonger_wake_s2_9	] {};
+void()	deathmonger_wake_s2_9	=[	$stand9,	deathmonger_wake_s2_10	] {};
+void() deathmonger_wake_s2_10  =[ $magic1,  deathmonger_wake_s2_11  ] {};
+void() deathmonger_wake_s2_11  =[ $magic2,  deathmonger_wake_s2_12  ] {};
+void() deathmonger_wake_s2_12  =[ $magic3,  deathmonger_wake_s2_13  ] {};
+void() deathmonger_wake_s2_13  =[ $magic4,  deathmonger_wake_s2_14 ] {};
+void() deathmonger_wake_s2_14  =[ $magic5,  deathmonger_wake_s2_15  ] {dmGibMissile('0 0 112');};
+void() deathmonger_wake_s2_15  =[ $magic5,  deathmonger_wake_s2_16  ] {};
+void() deathmonger_wake_s2_16  =[ $magic5,  deathmonger_wake_s2_17  ] {};
+void() deathmonger_wake_s2_17  =[ $magic5,  deathmonger_wake_s2_18  ] {};
+void() deathmonger_wake_s2_18  =[ $magic5,  deathmonger_wake_s2_19  ] {};
+void() deathmonger_wake_s2_19 =[ $magic5,  deathmonger_wake_s2_20  ] {};
+void() deathmonger_wake_s2_20 =[ $magic5,  deathmonger_wake_s2_21  ] {};
+void() deathmonger_wake_s2_21 =[ $magic5,  deathmonger_wake_s2_22  ] {dmGibMissile('0 0 112');};
+void() deathmonger_wake_s2_22  =[ $magic5,  deathmonger_wake_s2_23  ] {};
+void() deathmonger_wake_s2_23  =[ $magic5,  deathmonger_wake_s2_24  ] {};
+void() deathmonger_wake_s2_24  =[ $magic5,  deathmonger_wake_s2_25  ] {};
+void() deathmonger_wake_s2_25  =[ $magic5,  deathmonger_wake_s2_26  ] {};
+void() deathmonger_wake_s2_26  =[ $magic5,  deathmonger_wake_s2_27  ] {};
+void() deathmonger_wake_s2_27  =[ $magic5,  deathmonger_wake_s2_28  ] {};
+void() deathmonger_wake_s2_28  =[ $magic5,  deathmonger_wake_s2_29  ] {dmGibMissile('0 0 112');};
+void() deathmonger_wake_s2_29  =[ $magic5,  deathmonger_wake_s2_30  ] {};
+void() deathmonger_wake_s2_30  =[ $magic5,  deathmonger_wake_s2_31  ] {};
+void() deathmonger_wake_s2_31  =[ $magic5,  deathmonger_wake_s2_32  ] {};
+void() deathmonger_wake_s2_32  =[ $magic5,  deathmonger_wake_s2_33  ] {};
+void() deathmonger_wake_s2_33  =[ $magic5,  deathmonger_wake_s2_34  ] {};
+void()	deathmonger_wake_s2_34	=[	$magic4,	deathmonger_wake_s2_35	] {};
+void()	deathmonger_wake_s2_35	=[	$magic3,	deathmonger_wake_s2_36	] {};
+void()	deathmonger_wake_s2_36	=[	$magic2,	deathmonger_wake_s2_37	] {};
+void()	deathmonger_wake_s2_37	=[	$magic1,	deathmonger_wake_s2_38	] {};
+void()	deathmonger_wake_s2_38	=[	$stand1,	deathmonger_run1	] {
+//Okay you can damage me now that the cool animation is finished -dumptruck_ds
+self.takedamage = DAMAGE_AIM;
+};
+
+// WAKE ==================================================
 
 void()	deathmonger_wake1	=[	$stand1,	deathmonger_wake2	] {
 //no damage during wake up -dumptruck_ds
@@ -545,7 +649,7 @@ void(entity attacker, float damage)	deathmonger_pain =
 		{
 			// dprint("\bStage 2 Begins!\n");
 			self.shadowoff = 1;
-			deathmonger_wake1();
+			deathmonger_wake_s2_1();
 			return;
 		}
 	}
@@ -553,9 +657,9 @@ void(entity attacker, float damage)	deathmonger_pain =
 	{
 		if (self.health < self.max_health * 0.33)
 		{
-			// dprint("\bStage 3 Begins!\n");
+			dprint("\bStage 3 Begins!\n");
 			self.shadowoff = 2;
-			deathmonger_wake1();
+			// deathmonger_wake_s2_1();
 			return;
 		}
 	}
@@ -650,10 +754,12 @@ void() monster_death_monger =
 		return;
 	}
 	precache_sound ("boss1/throw.wav"); // for fireballs
+	precache_sound ("zombie/z_shot1.wav"); // for dmGibMissile
 
 	precache_model2("progs/deathmonger.mdl");
 	precache_model2("progs/h_dthmgr.mdl");
 	precache_model2("progs/k_spike.mdl");
+	precache_model("progs/zom_gib.mdl"); //for dmGibMissile
 
 	precache_sound2("hknight/death1.wav");
 	precache_sound2("hknight/pain1.wav");
